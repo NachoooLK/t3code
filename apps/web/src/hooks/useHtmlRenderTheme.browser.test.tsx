@@ -1,5 +1,5 @@
 import { HTML_RENDER_DEFAULT_FONTS, type HtmlRenderTheme } from "@t3tools/shared/htmlRender";
-import { BUILT_IN_THEME_IDS } from "@t3tools/shared/themePalettes";
+import { WEB_BUILT_IN_THEME_IDS } from "@t3tools/shared/themePalettes";
 import { act, useEffect } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
@@ -56,7 +56,7 @@ function readRenderTheme(): HtmlRenderTheme {
 
 describe("useHtmlRenderTheme", () => {
   for (const appearance of ["light", "dark"] as const) {
-    it.each([appearance, ...BUILT_IN_THEME_IDS])(
+    it.each([appearance, ...WEB_BUILT_IN_THEME_IDS])(
       `injects hex colors for %s in ${appearance} mode`,
       (preference) => {
         selection.theme = preference;

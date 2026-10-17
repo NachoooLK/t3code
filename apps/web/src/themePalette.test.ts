@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vite-plus/test";
 import { converter } from "culori/fn";
-import { BUILT_IN_THEMES } from "@t3tools/shared/themePalettes";
+import {
+  BUILT_IN_THEMES as MOBILE_BUILT_IN_THEMES,
+  WEB_BUILT_IN_THEMES as BUILT_IN_THEMES,
+  BUILT_IN_THEME_IDS,
+  MOBILE_THEME_IDS,
+  THEME_COLOR_ROLES,
+} from "@t3tools/shared/themePalettes";
 
 import {
   applyThemeColorPreview,
@@ -82,6 +88,50 @@ function contrastRatio(first: string, second: string): number {
 }
 
 describe("theme files", () => {
+  it("keeps the web-only palette outside native registration and Settings catalogs", () => {
+    expect(getThemeDefinition("synara")).not.toBeNull();
+    expect(MOBILE_THEME_IDS).toEqual(["t3-code", "t3-chat", "grove", "ocean", "ember", "iris"]);
+    expect(BUILT_IN_THEME_IDS).toEqual(["t3-chat", "grove", "ocean", "ember", "iris"]);
+    expect(MOBILE_BUILT_IN_THEMES.map((theme) => theme.id)).toEqual(BUILT_IN_THEME_IDS);
+  });
+
+  it("resolves Synara in both appearances with complete readable semantic colors", () => {
+    const theme = getThemeDefinition("synara");
+    expect(theme).not.toBeNull();
+    expect(getThemeModes(theme!)).toEqual(["light", "dark"]);
+    for (const mode of ["light", "dark"] as const) {
+      const colors = getThemeColorsForMode(theme!, mode)!;
+      expect(Object.keys(colors).sort()).toEqual([...THEME_COLOR_ROLES].sort());
+      for (const [foreground, background] of [
+        [colors.text, colors.canvas],
+        [colors.textMuted, colors.canvas],
+        [colors.sidebarForeground, colors.sidebarRowSelected],
+        [colors.sidebarMutedForeground, colors.sidebar],
+        [colors.accentForeground, colors.accent],
+        [colors.messageForeground, colors.messageSurface],
+        [colors.messageActionForeground, colors.messageAction],
+        [colors.codeForeground, colors.codeBackground],
+        [colors.terminalForeground, colors.terminalBackground],
+      ]) {
+        expect(contrastRatio(foreground!, background!)).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+    expect(resolveThemeAppearance("synara", true, true)).toBe("dark");
+    expect(resolveDesktopTheme("synara", true)).toBe("system");
+  });
+
+  it("reserves Synara's identity against imported custom palettes", () => {
+    expect(() =>
+      parseThemeFile({
+        version: THEME_FILE_VERSION,
+        id: "synara",
+        name: "Replacement",
+        appearance: "light",
+        colors: { canvas: "#fff" },
+      }),
+    ).toThrow(/reserved/);
+  });
+
   it("keeps every built-in palette value in canonical OKLCH form", () => {
     for (const theme of BUILT_IN_THEMES) {
       for (const colors of [theme.colors, ...Object.values(theme.variants ?? {})]) {

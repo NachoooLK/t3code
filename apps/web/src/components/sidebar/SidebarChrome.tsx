@@ -49,6 +49,7 @@ export const SidebarChromeHeader = memo(function SidebarChromeHeader({
 
   return (
     <div
+      data-sidebar-chrome-header
       className={cn(
         "relative flex h-[var(--workspace-topbar-height)] shrink-0 flex-row items-center gap-2 pr-3",
         isElectron && "drag-region",
@@ -103,6 +104,7 @@ export function SidebarBrandWidthProbe({
 function SidebarBrand({ onBackdrop }: { onBackdrop: boolean }) {
   return (
     <Link
+      data-sidebar-brand
       aria-label="Go to threads"
       className={cn(
         "relative z-10 ml-[var(--workspace-titlebar-content-left)] hidden h-7 w-fit min-w-0 shrink-0 items-center overflow-hidden rounded-md outline-hidden ring-ring focus-visible:ring-2 focus-visible:ring-inset md:flex",
@@ -141,7 +143,7 @@ function SidebarUtilityItem({
   onClick: () => void;
 }) {
   return (
-    <SidebarMenuItem className="shrink-0">
+    <SidebarMenuItem data-sidebar-utility-item className="shrink-0">
       <Tooltip>
         <TooltipTrigger
           render={

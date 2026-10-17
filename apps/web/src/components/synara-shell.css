@@ -1,0 +1,125 @@
+[data-synara-shell] {
+  --synara-tabbar-height: 0px;
+  --synara-activity-rail-width: 0px;
+}
+
+[data-synara-tabbar],
+[data-synara-activity-rail] {
+  display: none;
+}
+
+[data-synara-shell-body] {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (min-width: 768px) {
+  [data-synara-shell] {
+    --synara-tabbar-height: 2.5rem;
+    --synara-activity-rail-width: 2.75rem;
+    --workspace-titlebar-content-left: 0.75rem !important;
+    overflow: hidden;
+  }
+
+  [data-synara-shell][data-synara-desktop="true"],
+  .wco [data-synara-shell] {
+    --synara-tabbar-height: max(2.5rem, var(--workspace-topbar-height));
+  }
+
+  [data-synara-tabbar] {
+    display: flex;
+    align-items: stretch;
+    flex-shrink: 0;
+    height: var(--synara-tabbar-height);
+    min-width: 0;
+    padding-left: var(--synara-native-controls-left, 0.5rem);
+    padding-right: max(0.5rem, var(--workspace-native-controls-inset));
+    border-bottom: 1px solid var(--sidebar-border);
+    background: var(--sidebar);
+  }
+
+  [data-synara-tabbar] > * {
+    min-width: 0;
+    flex: 1;
+  }
+
+  [data-synara-activity-rail] {
+    z-index: 20;
+    display: flex;
+    flex: 0 0 var(--synara-activity-rail-width);
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0 0.375rem;
+    border-right: 1px solid var(--sidebar-border);
+    background: var(--sidebar);
+  }
+
+  [data-synara-activity-rail-spacer] {
+    flex: 1;
+  }
+
+  [data-synara-activity-button] {
+    display: flex;
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--control-radius);
+    color: var(--sidebar-muted-foreground);
+    cursor: pointer;
+    outline: none;
+    -webkit-app-region: no-drag;
+  }
+
+  [data-synara-activity-button] svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  [data-synara-activity-button]:hover {
+    background: var(--sidebar-row-hover);
+    color: var(--sidebar-foreground);
+  }
+
+  [data-synara-activity-button][data-active="true"],
+  [data-synara-activity-button]:active {
+    background: var(--sidebar-row-selected);
+    color: var(--sidebar-foreground);
+  }
+
+  [data-synara-activity-button]:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--ring);
+  }
+
+  [data-synara-shell-body] > [data-slot="sidebar-inset"] {
+    height: 100%;
+  }
+
+  [data-synara-shell] [data-app-sidebar][data-slot="sidebar-container"] {
+    top: var(--synara-tabbar-height);
+    left: var(--synara-activity-rail-width);
+    height: calc(100dvh - var(--synara-tabbar-height));
+  }
+
+  [data-synara-shell] [data-slot="sidebar"][data-state="collapsed"] [data-app-sidebar] {
+    left: calc(var(--synara-activity-rail-width) - var(--sidebar-width));
+    visibility: hidden;
+  }
+
+  [data-synara-shell] [data-sidebar-control] {
+    display: none;
+  }
+
+  /* Fixed controls use viewport coordinates; inline panel headers already sit below the tabs. */
+  [data-synara-shell] [data-workspace-titlebar-controls].fixed {
+    top: var(--synara-tabbar-height);
+  }
+
+  [data-synara-shell] [data-sidebar-utility-item] {
+    display: none;
+  }
+}

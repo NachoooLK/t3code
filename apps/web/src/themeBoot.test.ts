@@ -9,6 +9,8 @@ import {
   isKnownThemePreference,
   resolveThemeAppearance,
   T3_CHAT_THEME,
+  SYNARA_THEME,
+  themeColorToHex,
   EMBER_THEME,
   GROVE_THEME,
   IRIS_THEME,
@@ -110,7 +112,7 @@ function runtimeResolvedAppearance(
   invalidateCustomThemes();
   try {
     const raw = storage[THEME_STORAGE_KEY] ?? null;
-    const theme = raw !== null && isKnownThemePreference(raw) ? raw : "system";
+    const theme = raw !== null && isKnownThemePreference(raw) ? raw : "synara";
     const followRaw = storage[THEME_FOLLOW_SYSTEM_STORAGE_KEY] ?? null;
     const appearanceRaw = storage[THEME_APPEARANCE_MODE_STORAGE_KEY] ?? null;
     const appearanceMode =
@@ -120,7 +122,7 @@ function runtimeResolvedAppearance(
           ? "system"
           : followRaw === "false"
             ? null
-            : theme === "system"
+            : theme === "system" || theme === "synara"
               ? "system"
               : null;
     const followSystem = appearanceMode === "system";
@@ -146,6 +148,18 @@ const CHARCOAL_DARK_ONLY = {
 };
 
 describe("index.html boot script", () => {
+  it.each([false, true])(
+    "boots into Synara following OS dark=%s without a saved choice",
+    (prefersDark) => {
+      const boot = runBootScript({ prefersDark });
+      expect(boot.themeId).toBe("synara");
+      expect(boot.isDark).toBe(prefersDark);
+      expect(themeColorToHex(boot.bootVariables["--boot-background"]!)).toBe(
+        prefersDark ? "#101010" : "#f4f4f1",
+      );
+    },
+  );
+
   const parityCases: ReadonlyArray<{
     name: string;
     storage: Record<string, string>;
@@ -223,7 +237,7 @@ describe("index.html boot script", () => {
       prefersDark: true,
     },
     {
-      name: "a removed custom theme falls back to system",
+      name: "a removed custom theme falls back to Synara following the system",
       storage: { [THEME_STORAGE_KEY]: "gone-theme" },
       prefersDark: true,
     },
@@ -336,7 +350,14 @@ describe("index.html boot script", () => {
   });
 
   it("keeps every built-in boot splash in sync with the real palettes", () => {
-    for (const theme of [T3_CHAT_THEME, GROVE_THEME, OCEAN_THEME, EMBER_THEME, IRIS_THEME]) {
+    for (const theme of [
+      SYNARA_THEME,
+      T3_CHAT_THEME,
+      GROVE_THEME,
+      OCEAN_THEME,
+      EMBER_THEME,
+      IRIS_THEME,
+    ]) {
       expect(theme.appearance).toBe("light");
       for (const mode of ["light", "dark"] as const) {
         const colors = getThemeColorsForMode(theme, mode);
@@ -484,26 +505,26 @@ describe("index.html boot script", () => {
       prefersDark: false,
     });
 
-    expect(boot.themeId).toBeUndefined();
-    expect(boot.themeSelected).toBeUndefined();
-    expect(boot.backgroundColor).toBe("#ffffff");
-    expect(boot.metaContent).toBe("#ffffff");
+    expect(boot.themeId).toBe("synara");
+    expect(boot.themeSelected).toBe("true");
+    expect(themeColorToHex(boot.backgroundColor)).toBe("#f4f4f1");
+    expect(themeColorToHex(boot.metaContent!)).toBe("#f4f4f1");
   });
 
-  it("leaves unknown preferences unthemed so the runtime default applies", () => {
+  it("uses Synara for unknown preferences so the runtime default applies", () => {
     const boot = runBootScript({
       storage: { [THEME_STORAGE_KEY]: "gone-theme" },
       prefersDark: true,
     });
-    expect(boot.themeId).toBeUndefined();
-    expect(boot.themeSelected).toBeUndefined();
+    expect(boot.themeId).toBe("synara");
+    expect(boot.themeSelected).toBe("true");
     expect(boot.isDark).toBe(true);
   });
 
   it("follows the OS appearance when storage is unavailable", () => {
     const light = runBootScript({ storageThrows: true, prefersDark: false });
     expect(light.isDark).toBe(false);
-    expect(light.themeId).toBeUndefined();
+    expect(light.themeId).toBe("synara");
 
     const dark = runBootScript({ storageThrows: true, prefersDark: true });
     expect(dark.isDark).toBe(true);

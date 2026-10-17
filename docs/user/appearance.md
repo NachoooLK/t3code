@@ -21,6 +21,14 @@ Android uses **Material You Layout** by default unless you have turned it off in
 It changes shapes, spacing, and controls independently
 of the selected theme.
 
+## Conversation tabs
+
+On web and desktop, opening a conversation adds it to the tab bar. Tabs are saved on each
+device, and closing one keeps the conversation and its draft available in the sidebar.
+Closing the last tab leaves an empty workspace. Open a thread from the sidebar or choose
+**New thread** to continue. With a tab focused, use the arrow keys to move between tabs;
+**Alt+Shift+Left/Right** changes their order.
+
 ## Composer context
 
 Git-backed projects show branch and worktree controls below the composer while you create a thread.

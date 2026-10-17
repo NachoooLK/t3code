@@ -5,6 +5,7 @@ import { LinkIcon, PlusIcon } from "lucide-react";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { isLocalEnvironmentDisabled } from "../localEnvironment";
+import { openCommandPalette } from "../commandPaletteBus";
 import { isElectron } from "../env";
 import { NoProjectsHero } from "../components/NoProjectsHero";
 import { sortScopedProjectsForSidebar } from "../components/Sidebar.logic";
@@ -26,13 +27,34 @@ import { hasCloudPublicConfig } from "~/cloud/publicConfig";
 function ChatIndexRouteView() {
   const { authGateState } = Route.useRouteContext();
   const { environments, isReady } = useEnvironments();
+  const { closed } = Route.useSearch();
 
   if (authGateState.status === "hosted-static") {
     if (!isReady) return null;
     if (environments.length === 0) return <HostedStaticOnboardingState />;
   }
 
-  return <IndexDraftLanding />;
+  return closed ? <ClosedConversationsState /> : <IndexDraftLanding />;
+}
+
+function ClosedConversationsState() {
+  return (
+    <SidebarInset className="h-dvh min-h-0 overflow-hidden overscroll-y-none">
+      {isElectron ? <WorkspacePageHeader electron /> : null}
+      <Empty className="flex-1">
+        <EmptyHeader className="max-w-md">
+          <EmptyTitle>No open conversations</EmptyTitle>
+          <EmptyDescription>Open a thread from the sidebar or start a new one.</EmptyDescription>
+          <div className="mt-5 flex justify-center">
+            <Button size="sm" onClick={() => openCommandPalette({ open: "new-thread-in" })}>
+              <PlusIcon />
+              New thread
+            </Button>
+          </div>
+        </EmptyHeader>
+      </Empty>
+    </SidebarInset>
+  );
 }
 
 function IndexDraftLanding() {
@@ -115,6 +137,9 @@ function DraftStartError({ onRetry }: { readonly onRetry: () => void }) {
 }
 
 export const Route = createFileRoute("/_chat/")({
+  validateSearch: (search: Record<string, unknown>): { closed?: boolean | undefined } => ({
+    closed: search.closed === true ? true : undefined,
+  }),
   component: ChatIndexRouteView,
 });
 

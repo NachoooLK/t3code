@@ -1050,6 +1050,28 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
   }
 }
 
+html[data-theme-id="synara"] {
+  --surface-grain: none;
+  --glass-opacity: 100%;
+  --glass-blur: 0px;
+  --glass-saturation: 1;
+  --shadow-composer: 0 2px 12px -6px color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+html[data-theme-id="synara"] [data-slot="composer-shell"] {
+  --chat-composer-glass-surface: var(--card);
+  --chat-composer-outline: var(--border);
+}
+
+[data-synara-thread-row] [data-sidebar-thread-title] {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+[data-synara-thread-row] {
+  min-height: 3.5rem;
+}
+
 /* Safe-area inset utilities for surfaces that opt into edge-to-edge rendering.
    Insets resolve to 0 when the browser already constrains the layout viewport
    to the safe area. */

@@ -27,6 +27,28 @@ afterEach(() => {
 });
 
 describe("theme failure handling", () => {
+  it.each([null, "removed-theme"])(
+    "uses Synara and system appearance for missing preference %s",
+    async (stored) => {
+      const storage = createStorage();
+      if (stored !== null) storage.setItem("t3code:theme", stored);
+      vi.stubGlobal("window", { localStorage: storage });
+      const { readThemePreference, readAppearanceModePreference } = await import("./useTheme");
+      expect(readThemePreference()).toBe("synara");
+      expect(readAppearanceModePreference(readThemePreference())).toBe("system");
+      expect(storage.getItem("t3code:theme")).toBe(stored);
+    },
+  );
+
+  it("preserves an explicit appearance when falling back to Synara", async () => {
+    const storage = createStorage();
+    storage.setItem("t3code:theme-appearance-mode", "dark");
+    vi.stubGlobal("window", { localStorage: storage });
+    const { readThemePreference, readAppearanceModePreference } = await import("./useTheme");
+    expect(readThemePreference()).toBe("synara");
+    expect(readAppearanceModePreference(readThemePreference())).toBe("dark");
+  });
+
   it("preserves exact storage causes and operation context", async () => {
     const readCause = new Error("storage read blocked");
     const writeCause = new Error("storage quota exceeded");

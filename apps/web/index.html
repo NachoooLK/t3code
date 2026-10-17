@@ -51,6 +51,20 @@
         // Keep this small boot-time copy in sync with the built-in palettes so
         // the selected theme is visible before the app has mounted.
         const BUILT_IN_THEME_PALETTES = {
+          synara: {
+            light: {
+              background: "oklch(0.966318 0.003973 106.474)",
+              foreground: "oklch(0.322617 0.007069 118.213)",
+              accent: "oklch(0.520459 0.124187 43.435)",
+              chrome: "oklch(0.966318 0.003973 106.474)",
+            },
+            dark: {
+              background: "oklch(0.173042 0 0)",
+              foreground: "oklch(0.900033 0.002697 106.454)",
+              accent: "oklch(0.711815 0.08914 54.245)",
+              chrome: "oklch(0.173042 0 0)",
+            },
+          },
           "t3-chat": {
             light: {
               background: "oklch(0.982446 0.010114 325.653)",
@@ -134,6 +148,7 @@
           "system",
           "light",
           "dark",
+          "synara",
           "t3-chat",
           "grove",
           "ocean",
@@ -230,12 +245,11 @@
             "t3-iris": "iris",
           };
           const isLegacyT3ChatDark = storedTheme === "t3-chat-dark";
-          const themeId =
-            storedTheme === null ? "" : (LEGACY_THEME_IDS[storedTheme] ?? storedTheme);
+          let themeId = storedTheme === null ? "" : (LEGACY_THEME_IDS[storedTheme] ?? storedTheme);
           const legacyMode = isLegacyT3ChatDark ? "dark" : null;
           const builtInModes = BUILT_IN_THEME_MODES[themeId] ?? null;
           const customTheme = builtInModes ? null : findCustomTheme(themeId);
-          const themeModes =
+          let themeModes =
             builtInModes ??
             (customTheme
               ? ["light", "dark"].filter(
@@ -248,8 +262,12 @@
             storedTheme === "dark" ||
             storedTheme === "system" ||
             themeModes !== null;
-          const theme = isKnownTheme && storedTheme ? storedTheme : "system";
-          const isThemed = isKnownTheme && themeModes !== null;
+          const theme = isKnownTheme && storedTheme ? storedTheme : "synara";
+          if (!isKnownTheme) {
+            themeId = "synara";
+            themeModes = BUILT_IN_THEME_MODES.synara;
+          }
+          const isThemed = themeModes !== null;
           const baseAppearance = customTheme ? customTheme.appearance : "light";
           const systemMode = prefersDark ? "dark" : "light";
           const storedAppearanceMode = window.localStorage.getItem(
@@ -266,7 +284,7 @@
               ? "system"
               : storedFollowSystem === "false"
                 ? preferenceMode
-                : theme === "system"
+                : theme === "system" || theme === "synara"
                   ? "system"
                   : preferenceMode;
           // A valid mix half for the wanted appearance takes over: it decides
@@ -360,7 +378,7 @@
           }
           // A resolved half is a selection even when the base theme is gone
           // (deleting the base leaves the mix pointing at a real theme).
-          const hasSelection = halfThemeId !== null || (isKnownTheme && storedTheme !== null);
+          const hasSelection = effectiveIsThemed || (isKnownTheme && storedTheme !== null);
           if (hasSelection) {
             document.documentElement.dataset.themeSelected = "true";
           } else {
@@ -392,10 +410,14 @@
           } catch {
             // Keep the dark default when even matchMedia is unavailable.
           }
-          delete document.documentElement.dataset.themeId;
-          delete document.documentElement.dataset.themeSelected;
+          document.documentElement.dataset.themeId = "synara";
+          document.documentElement.dataset.themeSelected = "true";
           document.documentElement.classList.toggle("dark", prefersDark);
-          const fallbackColor = prefersDark ? DARK_BACKGROUND : LIGHT_BACKGROUND;
+          const palette = BUILT_IN_THEME_PALETTES.synara[prefersDark ? "dark" : "light"];
+          for (const [name, value] of Object.entries(palette)) {
+            document.documentElement.style.setProperty(`--boot-${name}`, value);
+          }
+          const fallbackColor = palette.chrome;
           document.documentElement.style.backgroundColor = fallbackColor;
           setThemeColor(fallbackColor);
         }
